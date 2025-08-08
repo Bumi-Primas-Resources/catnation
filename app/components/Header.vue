@@ -17,7 +17,7 @@ const props = defineProps<HeaderProps>()
     <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <!-- Logo -->
-        <div class="flex items-center hidden md:flex gap-x-4">
+        <div class="flex items-center  md:flex gap-x-4">
           <h1
             class="text-2xl font-black tracking-tight hover:scale-105 transition-transform cursor-pointer"
             :class="props.isDarkMode ? 'text-pink-400' : 'text-orange-500'"
@@ -40,9 +40,9 @@ const props = defineProps<HeaderProps>()
         </div>
 
         <!-- Navigation (Desktop) -->
-        <nav class="hidden md:flex items-center space-x-8">
+        <nav class=" md:flex items-center space-x-8">
 
-
+<div class="hidden  md:flex items-center space-x-8">
           <!-- Sign Up Button -->
           <button
             class="flex items-center space-x-2 px-4 py-2 rounded-full font-medium transition-all hover:scale-105"
@@ -64,6 +64,7 @@ const props = defineProps<HeaderProps>()
             <User size="18" />
             <span>Login</span>
           </button>
+</div>
 
                   <button
           @click="props.toggleDarkMode"
@@ -74,6 +75,7 @@ const props = defineProps<HeaderProps>()
         >
           <component :is="props.isDarkMode ? Sun : Moon" size="20" />
         </button>
+
         </nav>
 
         <!-- Dark/Light Mode Toggle -->

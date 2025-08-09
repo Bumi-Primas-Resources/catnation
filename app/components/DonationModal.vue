@@ -220,8 +220,8 @@ watch(() => props.isOpen, (open) => {
             placeholder="Email"
             v-model="formData.email"
             required
-            class="p-3 sm:p-4 rounded-xl transition-all focus:outline-none focus:ring-2"
-            :class="props.isDarkMode ? 'bg-gray-800 text-white placeholder-gray-400 focus:ring-pink-500' : 'bg-gray-50 text-gray-900 placeholder-gray-500 focus:ring-orange-500'"
+            class="p-3 sm:p-4 rounded-xl transition-all focus:outline-none focus:ring-2 sm:col-span-2"
+    :class="props.isDarkMode ? 'bg-gray-800 text-white placeholder-gray-400 focus:ring-pink-500' : 'bg-gray-50 text-gray-900 placeholder-gray-500 focus:ring-orange-500'"
           />
           
          

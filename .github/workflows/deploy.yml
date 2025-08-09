@@ -14,24 +14,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'   # change to 'yarn' or 'pnpm' if you use those
-
-      - run: npm ci     # or: yarn --frozen-lockfile / pnpm i --frozen-lockfile
-
+          cache: 'npm'
+      - run: npm ci
       - name: Generate
         env:
-          # Project page base
-          NUXT_APP_BASE_URL: /catnation/
+          NUXT_APP_BASE_URL: /catnation/   # ensure baseURL at build time
         run: npx nuxi generate
-
-      # Ensure client-side routes work on direct refresh
+      # SPA fallback so client-side routes work on refresh:
       - name: SPA Fallback
         run: cp .output/public/200.html .output/public/404.html || true
-
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .output/public

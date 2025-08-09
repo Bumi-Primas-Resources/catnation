@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { X, Heart, CreditCard, Shield } from 'lucide-vue-next'
+import { X, Heart, Shield } from 'lucide-vue-next' // (you aren’t using CreditCard here)
 
 interface DonationModalProps {
   isOpen: boolean
@@ -17,12 +17,10 @@ const frequency = ref<Freq>('one-time')
 const formData = ref({
   email: '',
   name: '',
-  cardNumber: '',
-  expiry: '',
-  cvc: '',
-  country: ''
+  number: '' // phone like 60123456789
 })
 const captchaChecked = ref(false)
+const loading = ref(false)
 
 const predefinedAmounts = [10, 20, 50, 100, 200] as const
 const frequencies: Freq[] = ['one-time', 'monthly', 'annual']
@@ -33,20 +31,81 @@ const displayAmount = computed(() => {
   return ''
 })
 
-function handleSubmit() {
+const { public: { apiBase } } = useRuntimeConfig()
+
+async function handleSubmit() {
   if (!captchaChecked.value) {
     alert('Please verify that you are human')
     return
   }
-  alert('Thank you for your donation! 🐾💕')
-  props.onClose()
+
+  const amount =
+    selectedAmount.value ?? (customAmount.value ? Number(customAmount.value) : 0)
+
+  if (!amount || Number.isNaN(amount)) return alert('Please enter a valid amount')
+
+  const payload = {
+    amount,
+    to: formData.value.name || 'Donor',
+    email: formData.value.email,
+    phone: formData.value.number,
+  }
+
+  const apiBase = useRuntimeConfig().public.apiBase
+
+  try {
+    // 1) Try JSON response first
+    const data: any = await $fetch('/pay', {
+      baseURL: apiBase,
+      method: 'POST',
+      body: payload,
+      // let $fetch handle CORS; if backend returns JSON link, we use it
+    })
+
+    const url =
+      data?.url ||
+      data?.redirectUrl ||
+      data?.redirect_url ||
+      data?.payment_url
+
+    if (url) {
+      window.location.href = url
+      return
+    }
+
+    // 2) Fallback: do a real POST via a hidden form so the browser follows 302
+    const form = document.createElement('form')
+    form.method = 'POST'
+    form.action = `${apiBase}/pay`
+    form.style.display = 'none'
+
+    Object.entries(payload).forEach(([k, v]) => {
+      const input = document.createElement('input')
+      input.type = 'hidden'
+      input.name = k
+      input.value = String(v ?? '')
+      form.appendChild(input)
+    })
+
+    document.body.appendChild(form)
+    form.submit() // Browser navigates, in-flight XHRs will show as (canceled)
+  } catch (err) {
+    console.error(err)
+    alert('Payment failed. Please try again.')
+  }
 }
 
-// Optional: lock body scroll when modal is open
+
+
+
+
+
+// lock body scroll when open (keep your existing)
 watch(() => props.isOpen, (open) => {
   document.body.classList.toggle('overflow-hidden', open)
 })
 </script>
+
 
 <template>
   <div
@@ -109,7 +168,7 @@ watch(() => props.isOpen, (open) => {
 
           <input
             type="number"
-            placeholder="Other amount (RM)"
+            placeholder="Custom Amount"
             v-model="customAmount"
             @input="selectedAmount = null"
             class="w-full p-3 sm:p-4 rounded-xl transition-all focus:outline-none focus:ring-2"
@@ -141,6 +200,21 @@ watch(() => props.isOpen, (open) => {
 
         <!-- Contact -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+           <input
+            type="text"
+            placeholder="Name"
+            v-model="formData.name"
+            required
+            class="p-3 sm:p-4 rounded-xl transition-all focus:outline-none focus:ring-2"
+            :class="props.isDarkMode ? 'bg-gray-800 text-white placeholder-gray-400 focus:ring-pink-500' : 'bg-gray-50 text-gray-900 placeholder-gray-500 focus:ring-orange-500'"
+          />
+                    <input
+            type="tel"
+            placeholder="Phone Number (RM)"
+            v-model="formData.number"
+            class="w-full p-3 sm:p-4 rounded-xl transition-all focus:outline-none focus:ring-2"
+            :class="props.isDarkMode ? 'bg-gray-800 text-white placeholder-gray-400 focus:ring-pink-500' : 'bg-gray-50 text-gray-900 placeholder-gray-500 focus:ring-orange-500'"
+          />
           <input
             type="email"
             placeholder="Email"
@@ -149,14 +223,8 @@ watch(() => props.isOpen, (open) => {
             class="p-3 sm:p-4 rounded-xl transition-all focus:outline-none focus:ring-2"
             :class="props.isDarkMode ? 'bg-gray-800 text-white placeholder-gray-400 focus:ring-pink-500' : 'bg-gray-50 text-gray-900 placeholder-gray-500 focus:ring-orange-500'"
           />
-          <input
-            type="text"
-            placeholder="Name"
-            v-model="formData.name"
-            required
-            class="p-3 sm:p-4 rounded-xl transition-all focus:outline-none focus:ring-2"
-            :class="props.isDarkMode ? 'bg-gray-800 text-white placeholder-gray-400 focus:ring-pink-500' : 'bg-gray-50 text-gray-900 placeholder-gray-500 focus:ring-orange-500'"
-          />
+          
+         
         </div>
 
         <!-- reCAPTCHA -->

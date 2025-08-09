@@ -4,9 +4,12 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxtjs/tailwindcss'],
 
-    app: {
-    baseURL: process.env.NUXT_APP_BASE_URL ?? '/catnation/', // or '/'
-  },
+  app: {
+    baseURL: '/', // ✅ no subpath
+  }, 
+  
+runtimeConfig: { public: { apiBase: 'https://cat.megumin.dev/api', } }
+,
 
     nitro: {
     prerender: {
@@ -14,5 +17,7 @@ export default defineNuxtConfig({
       routes: ['/'], // add other routes if needed
     },
     },
+
+
 
 })

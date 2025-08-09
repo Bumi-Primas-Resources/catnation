@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss'],
 
   app: {
-    baseURL: '/catnation/', // <-- repo name with leading & trailing slash
+        baseURL: process.env.NODE_ENV === 'production' ? '/catnation/' : '/', // <-- repo name with leading & trailing slash
   },
   
 runtimeConfig: { public: {  apiBase: process.env.NUXT_PUBLIC_API_BASE} }

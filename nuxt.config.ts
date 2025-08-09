@@ -8,7 +8,7 @@ export default defineNuxtConfig({
     baseURL: '/', // ✅ no subpath
   }, 
   
-runtimeConfig: { public: { apiBase: 'https://cat.megumin.dev/api', } }
+runtimeConfig: { public: {  apiBase: process.env.NUXT_PUBLIC_API_BASE} }
 ,
 
     nitro: {

@@ -1,9 +1,7 @@
 name: Deploy to GitHub Pages
-
 on:
   push:
     branches: [ main ]
-
 permissions:
   contents: read
   pages: write
@@ -12,6 +10,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production  # ensures baseURL=/catnation/
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,11 +20,8 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - name: Generate
-        env:
-          NUXT_APP_BASE_URL: /catnation/   # ensure baseURL at build time
         run: npx nuxi generate
-      # SPA fallback so client-side routes work on refresh:
-      - name: SPA Fallback
+      - name: SPA fallback
         run: cp .output/public/200.html .output/public/404.html || true
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -33,9 +30,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
